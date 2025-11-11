@@ -9,42 +9,66 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    html,body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+    :root{
+      --navy:#0b1f3a; /* bleu marine profond */
+      --navy-2:#09223f; /* encore plus profond */
+      --ink:#e6edff; /* encre claire pour motifs */
+    }
+    html,body{
+      background-color:var(--navy) !important;
+      background-image:url('bg-dinos.png') !important;
+      background-repeat: repeat;
+      background-size: 700px auto;
+      background-attachment: fixed;
+    }
+    /* Fond avec motif dinosaures (SVG tile + voile doux) */
+    body{
+      background-color:var(--soft);
+      background-image:
+        linear-gradient(rgba(255,255,255,.85), rgba(255,255,255,.85)),
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'>
+          <g fill='none' stroke='%230b1f3a' stroke-opacity='.06' stroke-width='2'>
+            <path d='M20 120c10-30 60-15 65-45 1-10-7-18-18-20-8-2-8-14 3-14 22 0 40 14 40 36 0 27-22 46-48 46-18 0-32-6-42-17z' />
+            <path d='M110 40c2 8 10 12 18 12 5 0 10 4 10 9 0 14-18 14-28 12-10-2-18-8-25-15' />
+            <circle cx='30' cy='30' r='6'/>
+            <circle cx='130' cy='130' r='6'/>
+          </g>
+        </svg>");
+      background-size:auto,160px 160px;
+    }
     .row-checked{filter:grayscale(1); opacity:.55}
-    .pretty-card{background:linear-gradient(180deg,#fff, #fafbfd); box-shadow:0 4px 22px rgba(2,6,23,.08)}
-    .pill{display:inline-block;padding:.25rem .6rem;border-radius:9999px;font-size:.72rem;background:#eef2ff;color:#3730a3}
+    .pretty-card{background:#fff; box-shadow:0 12px 30px rgba(2,6,23,.08); border:1px solid rgba(2,6,23,.06)}
+    .pill{display:inline-block;padding:.25rem .6rem;border-radius:9999px;font-size:.72rem;background:#e5ecff;color:#1e3a8a}
+    a{color:#cdd9ff}
   </style>
   <!-- Firebase (Compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body class="min-h-screen">
   <div class="max-w-4xl mx-auto p-6">
-    <header class="flex items-center justify-between gap-4">
-      <div>
-        <h1 class="text-2xl md:text-3xl font-bold">🎁 Liste de cadeaux — Noël & Anniversaire</h1>
-        <p class="text-slate-600">Partage le lien. Chacun coche ou clique sur le lien, point barre.</p>
-      </div>
-      <div class="hidden md:block">
-        <span class="pill">Synchronisation en direct</span>
+    <header class="rounded-2xl p-6 md:p-7" style="background:linear-gradient(135deg,var(--navy-2),var(--navy)); color:white; box-shadow:0 10px 30px rgba(0,0,0,.35)">
+      <div class="flex items-start md:items-center justify-between gap-4">
+        <div>
+          <h1 class="text-2xl md:text-3xl font-extrabold">🦕 Liste de cadeaux — Noël & Anniversaire</h1>
+          <p class="text-white/80">Partage le lien. Chacun coche ou clique sur le lien — simple comme bonjour.</p>
+        </div>
+        <div class="hidden md:block">
+          <span class="pill bg-white/15 text-white border border-white/20">Synchro en direct</span>
+        </div>
       </div>
     </header>
 
     <!-- Filtres minimalistes -->
     <section class="mt-6 pretty-card rounded-2xl p-4">
       <div class="flex flex-wrap items-center gap-2">
-        <select id="filterCategory" class="border rounded-lg px-3 py-2">
-          <option value="">Toutes catégories</option>
-          <option value="Noël">Noël</option>
-          <option value="Anniversaire">Anniversaire</option>
+        <select id=\"filterReserved\" class=\"border rounded-lg px-3 py-2\">
+          <option value=\"all\">Tous</option>
+          <option value=\"no\">Non cochés</option>
+          <option value=\"yes\">Cochés</option>
         </select>
-        <select id="filterReserved" class="border rounded-lg px-3 py-2">
-          <option value="all">Tous</option>
-          <option value="no">Non cochés</option>
-          <option value="yes">Cochés</option>
-        </select>
-        <input id="filterSearch" class="border rounded-lg px-3 py-2 flex-1 min-w-[200px]" placeholder="Rechercher un jouet…" />
-        <span class="text-sm text-slate-500" id="counter"></span>
+        <input id=\"filterSearch\" class=\"border rounded-lg px-3 py-2 flex-1 min-w-[200px]\" placeholder=\"Rechercher un jouet…\" />
+        <span class=\"text-sm text-slate-500\" id=\"counter\"></span>
       </div>
     </section>
 
@@ -52,14 +76,13 @@
     <section class="mt-6 pretty-card rounded-2xl overflow-hidden">
       <div class="overflow-x-auto">
         <table class="min-w-full text-sm">
-          <thead class="bg-slate-100 text-slate-700">
+          <thead class="text-white" style="background:linear-gradient(135deg,var(--navy-2),var(--navy))">
             <tr>
-              <th class="text-left px-4 py-3 w-12">OK</th>
-              <th class="text-left px-4 py-3">Nom du jouet</th>
-              <th class="text-left px-4 py-3">Prix</th>
-              <th class="text-left px-4 py-3">Magasin(s) alternatif(s)</th>
-              <th class="text-left px-4 py-3">Catégorie</th>
-              <th class="text-left px-4 py-3 w-10"></th>
+              <th class=\"text-left px-4 py-3 w-12\">OK</th>
+              <th class=\"text-left px-4 py-3\">Nom du jouet</th>
+              <th class=\"text-left px-4 py-3\">Prix</th>
+              <th class=\"text-left px-4 py-3\">Magasin(s) alternatif(s)</th>
+              <th class=\"text-left px-4 py-3 w-10\"></th>
             </tr>
           </thead>
           <tbody id="tbody" class="divide-y"></tbody>
@@ -68,12 +91,12 @@
     </section>
 
     <footer class="text-xs text-slate-500 mt-6 text-center">
-      <p>Astuce : tu peux créer plusieurs listes avec l'URL, ex. <code>?list=noel</code> et <code>?list=anniv</code>.</p>
+      <p>Astuce : l’ajout se fait avec le bouton <strong>＋</strong> en bas à droite.</p>
     </footer>
   </div>
 
   <!-- Bouton + flottant -->
-  <button id="fab" class="fixed bottom-5 right-5 rounded-full w-14 h-14 flex items-center justify-center text-white text-2xl shadow-xl bg-slate-900 hover:bg-slate-800" title="Ajouter un cadeau">＋</button>
+  <button id="fab" class="fixed bottom-5 right-5 rounded-full w-14 h-14 flex items-center justify-center text-white text-2xl shadow-xl" style="background:var(--navy)" title="Ajouter un cadeau">＋</button>
 
   <!-- Modal ajout -->
   <div id="modal" class="fixed inset-0 bg-black/40 hidden items-end sm:items-center justify-center p-4">
@@ -82,15 +105,14 @@
         <h2 class="font-semibold text-lg">Ajouter un cadeau</h2>
         <button id="closeModal" class="text-slate-400 hover:text-slate-700">✕</button>
       </div>
-      <form id="addForm" class="grid grid-cols-1 gap-3">
-        <input required name="name" class="border rounded-lg px-3 py-2" placeholder="Nom du jouet" />
-        <input name="price" class="border rounded-lg px-3 py-2" placeholder="Prix (ex: 29,99€)" />
-        <input name="url" type="url" class="border rounded-lg px-3 py-2" placeholder="Lien vers le produit (URL)" />
-        <input name="alts" class="border rounded-lg px-3 py-2" placeholder="Autres magasins (séparés par des virgules)" />
-        <select name="category" class="border rounded-lg px-3 py-2"><option>Noël</option><option>Anniversaire</option></select>
-        <div class="flex gap-2 justify-end mt-2">
-          <button type="button" id="cancelAdd" class="px-4 py-2 rounded-lg border">Annuler</button>
-          <button class="px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-800" type="submit">Ajouter</button>
+      <form id=\"addForm\" class=\"grid grid-cols-1 gap-3\">
+        <input required name=\"name\" class=\"border rounded-lg px-3 py-2\" placeholder=\"Nom du jouet\" />
+        <input name=\"price\" class=\"border rounded-lg px-3 py-2\" placeholder=\"Prix (ex: 29,99€)\" />
+        <input name=\"url\" type=\"url\" class=\"border rounded-lg px-3 py-2\" placeholder=\"Lien vers le produit (URL)\" />
+        <input name=\"alts\" class=\"border rounded-lg px-3 py-2\" placeholder=\"Autres magasins (séparés par des virgules)\" />
+        <div class=\"flex gap-2 justify-end mt-2\">
+          <button type=\"button\" id=\"cancelAdd\" class=\"px-4 py-2 rounded-lg border\">Annuler</button>
+          <button class=\"px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-800\" type=\"submit\">Ajouter</button>
         </div>
       </form>
     </div>
@@ -110,6 +132,7 @@
 
     const params = new URLSearchParams(location.search);
     const LIST_ID = params.get('list') || 'liste-principale';
+    const IS_ADMIN = params.get('admin') === '1';
 
     // Init Firebase
     const app = firebase.initializeApp(firebaseConfig);
@@ -118,7 +141,7 @@
 
     // UI refs
     const tbody = document.getElementById('tbody');
-    const filterCategory = document.getElementById('filterCategory');
+    
     const filterReserved = document.getElementById('filterReserved');
     const filterSearch = document.getElementById('filterSearch');
     const counter = document.getElementById('counter');
@@ -135,8 +158,6 @@
     let allItems = {};
 
     function render(){
-      const cat = filterCategory.value;
-      const res = filterReserved.value; // all | yes | no
       const q = filterSearch.value.toLowerCase().trim();
       const entries = Object.entries(allItems).map(([id,x])=>({id, ...x}))
         .sort((a,b)=> (a.reserved===true) - (b.reserved===true) || (a.name||'').localeCompare(b.name||''));
@@ -145,10 +166,10 @@
       let visible=0, total=entries.length, totalReserved=0;
 
       for(const it of entries){
-        if (cat && it.category !== cat) continue;
+        
         if (res==='yes' && !it.reserved) continue;
         if (res==='no' && it.reserved) continue;
-        const hay = `${it.name||''} ${it.price||''} ${it.alts||''} ${it.category||''}`.toLowerCase();
+        const hay = `${it.name||''} ${it.price||''} ${it.alts||''}`.toLowerCase();
         if (q && !hay.includes(q)) continue;
         visible++; if (it.reserved) totalReserved++;
 
@@ -193,14 +214,17 @@
           td3.appendChild(ul);
         }
 
-        const td4 = document.createElement('td'); td4.className='px-4 py-3 align-top'; td4.textContent = it.category || '';
-
+        
         const td5 = document.createElement('td'); td5.className='px-4 py-3 align-top';
-        const del = document.createElement('button'); del.className='text-slate-400 hover:text-red-600'; del.title='Supprimer'; del.textContent='✕';
-        del.addEventListener('click',()=>{ if(confirm('Supprimer cet élément ?')) rootRef.child(it.id).remove(); });
-        td5.appendChild(del);
+        if (IS_ADMIN){
+          const del = document.createElement('button'); del.className='text-slate-400 hover:text-red-600'; del.title='Supprimer'; del.textContent='✕';
+          del.addEventListener('click',()=>{ if(confirm('Supprimer cet élément ?')) rootRef.child(it.id).remove(); });
+          td5.appendChild(del);
+        } else {
+          td5.innerHTML = '<span class="text-slate-300">—</span>';
+        }
 
-        tr.append(td0,td1,td2,td3,td4,td5);
+        tr.append(td0,td1,td2,td3,td5);
         tbody.appendChild(tr);
       }
       counter.textContent = `${visible} affiché(s) / ${total} — ${totalReserved} coché(s)`;
@@ -221,7 +245,7 @@
         price: (fd.get('price')||'').toString().trim(),
         url: (fd.get('url')||'').toString().trim(),
         alts: (fd.get('alts')||'').toString().trim(),
-        category: fd.get('category')||'Noël',
+        
         reserved: false,
         createdAt: Date.now()
       };
@@ -231,7 +255,7 @@
     });
 
     // Filtres
-    for (const el of [filterCategory, filterReserved, filterSearch]) el.addEventListener('input', render);
+    for (const el of [filterReserved, filterSearch]) el.addEventListener('input', render);
 
     // Live listeners (fiables)
     rootRef.on('value', snap => {
