@@ -3,116 +3,108 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Liste cadeaux — Noël & Anniversaire</title>
+  <title>Noël & Anniversaire de Matteo</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
   <style>
-    :root{
-      --navy:#0b1f3a; /* bleu marine profond */
-      --navy-2:#09223f; /* encore plus profond */
-      --ink:#e6edff; /* encre claire pour motifs */
-    }
-    html,body{
-      background-color:var(--navy) !important;
-      background-image:url('bg-dinos.png') !important;
-      background-repeat: repeat;
-      background-size: 700px auto;
-      background-attachment: fixed;
-    }
-    /* Fond avec motif dinosaures (SVG tile + voile doux) */
+    :root{ --navy:#0b1f3a; --navy-2:#09223f; --ink:#e6edff; }
+    html,body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
+
+    /* --- Fond bleu marine + dinos --- */
     body{
-      background-color:var(--soft);
-      background-image:
-        linear-gradient(rgba(255,255,255,.85), rgba(255,255,255,.85)),
-        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'>
-          <g fill='none' stroke='%230b1f3a' stroke-opacity='.06' stroke-width='2'>
-            <path d='M20 120c10-30 60-15 65-45 1-10-7-18-18-20-8-2-8-14 3-14 22 0 40 14 40 36 0 27-22 46-48 46-18 0-32-6-42-17z' />
-            <path d='M110 40c2 8 10 12 18 12 5 0 10 4 10 9 0 14-18 14-28 12-10-2-18-8-25-15' />
-            <circle cx='30' cy='30' r='6'/>
-            <circle cx='130' cy='130' r='6'/>
-          </g>
-        </svg>");
-      background-size:auto,160px 160px;
+      background-color:var(--navy) !important;
+      background-image:url('bg-dinos.png') !important; /* ✅ mets bg-dinos.png à la racine du repo */
+      background-repeat:repeat; background-size:700px auto; background-attachment:fixed;
     }
+
+    /* --- Cartes & look --- */
+    .pretty-card{background:#0b1f3acc; border:1px solid rgba(255,255,255,.12); box-shadow:0 10px 30px rgba(0,0,0,.25); backdrop-filter: blur(6px);} /* navy translucide */
+    .white-card{background:#ffffff; box-shadow:0 12px 30px rgba(2,6,23,.12); border:1px solid rgba(2,6,23,.06)}
     .row-checked{filter:grayscale(1); opacity:.55}
-    .pretty-card{background:#fff; box-shadow:0 12px 30px rgba(2,6,23,.08); border:1px solid rgba(2,6,23,.06)}
-    .pill{display:inline-block;padding:.25rem .6rem;border-radius:9999px;font-size:.72rem;background:#e5ecff;color:#1e3a8a}
+
+    /* --- Inputs style pilule --- */
+    .control{appearance:none;-webkit-appearance:none;-moz-appearance:none; background:rgba(255,255,255,.08)!important; border:1px solid rgba(255,255,255,.25)!important; color:#e6edff!important; padding:.65rem 1rem; border-radius:9999px; backdrop-filter:blur(6px);}
+    .control::placeholder{color:#cbd5ff99}
+    .control:focus{outline:none; box-shadow:0 0 0 3px rgba(230,237,255,.18); border-color:#cbd5ff80!important}
+    select.control{background-image:linear-gradient(45deg,transparent 50%, #cbd5ff 50%),linear-gradient(135deg,#cbd5ff 50%,transparent 50%),linear-gradient(to right, rgba(255,255,255,.12), rgba(255,255,255,.12));background-position:calc(100% - 18px) calc(50% + 2px),calc(100% - 12px) calc(50% + 2px),calc(100% - 2.5rem) 0.8rem;background-size:6px 6px,6px 6px,1px 1.2rem;background-repeat:no-repeat;padding-right:2.6rem}
+    .control option{background:#0b1f3a;color:#e6edff}
+
+    /* --- Table --- */
+    thead th{font-weight:700}
+    .table-wrap{border-radius:20px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    .thead-navy{background:linear-gradient(135deg,var(--navy-2),var(--navy)); color:white; border-bottom:1px solid rgba(255,255,255,.12)}
+
     a{color:#cdd9ff}
-  </style>
+  .dark-table tbody tr{background:rgba(255,255,255,.06)}
+    .dark-table tbody tr:hover{background:rgba(255,255,255,.09)}
+    .dark-table td{color:#e6edff}
+    .dark-table td .text-slate-500{color:#cbd5ff99}
+    .dark-table input[type=checkbox]{accent-color:#cdd9ff}
+    </style>
   <!-- Firebase (Compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 </head>
 <body class="min-h-screen">
-  <div class="max-w-4xl mx-auto p-6">
-    <header class="rounded-2xl p-6 md:p-7" style="background:linear-gradient(135deg,var(--navy-2),var(--navy)); color:white; box-shadow:0 10px 30px rgba(0,0,0,.35)">
-      <div class="flex items-start md:items-center justify-between gap-4">
-        <div>
-          <h1 class="text-2xl md:text-3xl font-extrabold">🦕 Liste de cadeaux — Noël & Anniversaire</h1>
-          <p class="text-white/80">Partage le lien. Chacun coche ou clique sur le lien — simple comme bonjour.</p>
-        </div>
-        <div class="hidden md:block">
-          <span class="pill bg-white/15 text-white border border-white/20">Synchro en direct</span>
-        </div>
-      </div>
+  <div class="max-w-5xl mx-auto p-6">
+    <!-- Header -->
+    <header class="rounded-3xl p-6 md:p-7 pretty-card text-white">
+      <h1 class="text-2xl md:text-3xl font-extrabold">🦖 Noël & Anniversaire de Matteo</h1>
     </header>
 
-    <!-- Filtres minimalistes -->
-    <section class="mt-6 pretty-card rounded-2xl p-4">
-      <div class="flex flex-wrap items-center gap-2">
-        <select id=\"filterReserved\" class=\"border rounded-lg px-3 py-2\">
-          <option value=\"all\">Tous</option>
-          <option value=\"no\">Non cochés</option>
-          <option value=\"yes\">Cochés</option>
+    <!-- Filtres -->
+    <!-- Filtres -->
+    <section class="mt-6 rounded-3xl pretty-card p-4">
+      <div class="flex flex-wrap items-center gap-3">
+        <select id="filterReserved" class="control">
+          <option value="all">Tous</option>
+          <option value="no">Non cochés</option>
+          <option value="yes">Cochés</option>
         </select>
-        <input id=\"filterSearch\" class=\"border rounded-lg px-3 py-2 flex-1 min-w-[200px]\" placeholder=\"Rechercher un jouet…\" />
-        <span class=\"text-sm text-slate-500\" id=\"counter\"></span>
+        <input id="filterSearch" class="control flex-1 min-w-[220px]" placeholder="Rechercher un cadeau…" />
+        <span class="text-sm text-white/80" id="counter"></span>
       </div>
     </section>
 
-    <!-- Liste -->
-    <section class="mt-6 pretty-card rounded-2xl overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="min-w-full text-sm">
-          <thead class="text-white" style="background:linear-gradient(135deg,var(--navy-2),var(--navy))">
-            <tr>
-              <th class=\"text-left px-4 py-3 w-12\">OK</th>
-              <th class=\"text-left px-4 py-3\">Nom du jouet</th>
-              <th class=\"text-left px-4 py-3\">Prix</th>
-              <th class=\"text-left px-4 py-3\">Magasin(s) alternatif(s)</th>
-              <th class=\"text-left px-4 py-3 w-10\"></th>
-            </tr>
-          </thead>
-          <tbody id="tbody" class="divide-y"></tbody>
-        </table>
-      </div>
+    <!-- Tableau -->
+    <section class="mt-6 table-wrap pretty-card p-0">
+      <table class="min-w-full text-sm dark-table">
+        <thead class="thead-navy">
+          <tr>
+            <th class="text-left px-4 py-3 w-12">OK</th>
+            <th class="text-left px-4 py-3">Nom du cadeau</th>
+            <th class="text-left px-4 py-3">Prix</th>
+            <th class="text-left px-4 py-3">Magasin(s) alternatif(s)</th>
+            <th class="text-left px-4 py-3 w-10"></th>
+          </tr>
+        </thead>
+        <tbody id="tbody" class="divide-y"></tbody>
+      </table>
+        <div id="emptyState" class="text-center text-white/80 py-10 hidden">Aucun cadeau à afficher pour le moment.</div>
     </section>
 
-    <footer class="text-xs text-slate-500 mt-6 text-center">
-      <p>Astuce : l’ajout se fait avec le bouton <strong>＋</strong> en bas à droite.</p>
-    </footer>
   </div>
 
-  <!-- Bouton + flottant -->
-  <button id="fab" class="fixed bottom-5 right-5 rounded-full w-14 h-14 flex items-center justify-center text-white text-2xl shadow-xl" style="background:var(--navy)" title="Ajouter un cadeau">＋</button>
+  <!-- FAB -->
+  <button id="fab" class="fixed bottom-5 right-5 z-50 rounded-full w-14 h-14 flex items-center justify-center text-white text-2xl shadow-2xl" style="background:var(--navy);" onclick="document.getElementById('modal').classList.remove('hidden')">＋</button>
 
-  <!-- Modal ajout -->
-  <div id="modal" class="fixed inset-0 bg-black/40 hidden items-end sm:items-center justify-center p-4">
+  <!-- Modal -->
+  <div id="modal" class="fixed inset-0 bg-black/60 hidden flex items-end sm:items-center justify-center p-4 z-50" onclick="if(event.target===this){this.classList.add('hidden')}">
     <div class="bg-white rounded-2xl w-full max-w-xl p-5 shadow-xl">
       <div class="flex items-center justify-between mb-3">
         <h2 class="font-semibold text-lg">Ajouter un cadeau</h2>
-        <button id="closeModal" class="text-slate-400 hover:text-slate-700">✕</button>
+        <button id="closeModal" class="text-slate-400 hover:text-slate-700" aria-label="Fermer" onclick="document.getElementById('modal').classList.add('hidden')">✕</button>
       </div>
-      <form id=\"addForm\" class=\"grid grid-cols-1 gap-3\">
-        <input required name=\"name\" class=\"border rounded-lg px-3 py-2\" placeholder=\"Nom du jouet\" />
-        <input name=\"price\" class=\"border rounded-lg px-3 py-2\" placeholder=\"Prix (ex: 29,99€)\" />
-        <input name=\"url\" type=\"url\" class=\"border rounded-lg px-3 py-2\" placeholder=\"Lien vers le produit (URL)\" />
-        <input name=\"alts\" class=\"border rounded-lg px-3 py-2\" placeholder=\"Autres magasins (séparés par des virgules)\" />
-        <div class=\"flex gap-2 justify-end mt-2\">
-          <button type=\"button\" id=\"cancelAdd\" class=\"px-4 py-2 rounded-lg border\">Annuler</button>
-          <button class=\"px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-800\" type=\"submit\">Ajouter</button>
+      <form id="addForm" class="grid grid-cols-1 gap-3">
+        <input required name="name" class="border rounded-lg px-3 py-2" placeholder="Nom du jouet" />
+        <input name="price" class="border rounded-lg px-3 py-2" placeholder="Prix (ex: 29,99€)" />
+        <input name="url" type="url" class="border rounded-lg px-3 py-2" placeholder="Lien vers le produit (URL)" />
+        <input name="alts" class="border rounded-lg px-3 py-2" placeholder="Autres magasins (séparés par des virgules)" />
+        <div class="flex gap-2 justify-end mt-2">
+          <button type="button" id="cancelAdd" class="px-4 py-2 rounded-lg border">Annuler</button>
+          <button class="px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-800" type="submit">Ajouter</button>
         </div>
       </form>
     </div>
@@ -132,32 +124,38 @@
 
     const params = new URLSearchParams(location.search);
     const LIST_ID = params.get('list') || 'liste-principale';
-    const IS_ADMIN = params.get('admin') === '1';
 
-    // Init Firebase
+    // Firebase
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const rootRef = db.ref(`giftlists/${LIST_ID}/items`);
 
-    // UI refs
+    // --- UI elements ---
     const tbody = document.getElementById('tbody');
-    
     const filterReserved = document.getElementById('filterReserved');
     const filterSearch = document.getElementById('filterSearch');
     const counter = document.getElementById('counter');
 
     const modal = document.getElementById('modal');
     const fab = document.getElementById('fab');
-    const closeModal = document.getElementById('closeModal');
+    const closeModalBtn = document.getElementById('closeModal');
     const cancelAdd = document.getElementById('cancelAdd');
     const addForm = document.getElementById('addForm');
 
-    fab.onclick = ()=> modal.classList.remove('hidden');
-    closeModal.onclick = cancelAdd.onclick = ()=> modal.classList.add('hidden');
+    // --- Modal open/close (solide) ---
+    const openModal = ()=> modal.classList.remove('hidden');
+    const closeModal = ()=> modal.classList.add('hidden');
+    modal.classList.add('hidden'); // caché par défaut
+    fab.addEventListener('click', openModal);
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelAdd.addEventListener('click', closeModal);
+    modal.addEventListener('click', (e)=>{ if(e.target === modal) closeModal(); });
+    window.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); });
 
     let allItems = {};
 
     function render(){
+      const res = filterReserved.value; // all | yes | no
       const q = filterSearch.value.toLowerCase().trim();
       const entries = Object.entries(allItems).map(([id,x])=>({id, ...x}))
         .sort((a,b)=> (a.reserved===true) - (b.reserved===true) || (a.name||'').localeCompare(b.name||''));
@@ -166,7 +164,6 @@
       let visible=0, total=entries.length, totalReserved=0;
 
       for(const it of entries){
-        
         if (res==='yes' && !it.reserved) continue;
         if (res==='no' && it.reserved) continue;
         const hay = `${it.name||''} ${it.price||''} ${it.alts||''}`.toLowerCase();
@@ -180,8 +177,7 @@
         const td0 = document.createElement('td');
         td0.className='px-4 py-3 align-top';
         const cb = document.createElement('input');
-        cb.type='checkbox';
-        cb.checked = !!it.reserved;
+        cb.type='checkbox'; cb.checked = !!it.reserved;
         cb.addEventListener('change',()=>toggleReserved(it.id));
         td0.appendChild(cb);
 
@@ -200,8 +196,10 @@
           urlSmall.textContent = it.url; td1.appendChild(urlSmall);
         }
 
+        // price
         const td2 = document.createElement('td'); td2.className='px-4 py-3 align-top'; td2.textContent = it.price || '';
 
+        // alts
         const td3 = document.createElement('td'); td3.className='px-4 py-3 align-top';
         if (it.alts){
           const parts = it.alts.split(',').map(s=>s.trim()).filter(Boolean);
@@ -214,20 +212,19 @@
           td3.appendChild(ul);
         }
 
-        
-        const td5 = document.createElement('td'); td5.className='px-4 py-3 align-top';
-        if (IS_ADMIN){
-          const del = document.createElement('button'); del.className='text-slate-400 hover:text-red-600'; del.title='Supprimer'; del.textContent='✕';
-          del.addEventListener('click',()=>{ if(confirm('Supprimer cet élément ?')) rootRef.child(it.id).remove(); });
-          td5.appendChild(del);
-        } else {
-          td5.innerHTML = '<span class="text-slate-300">—</span>';
-        }
+        // actions
+        const td4 = document.createElement('td'); td4.className='px-4 py-3 align-top';
+        const del = document.createElement('button'); del.className='text-white/70 hover:text-red-400'; del.title='Supprimer'; del.textContent='✕';
+        del.addEventListener('click',()=>{ if(confirm('Supprimer cet élément ?')) rootRef.child(it.id).remove(); });
+        td4.appendChild(del);
 
-        tr.append(td0,td1,td2,td3,td5);
+        tr.append(td0,td1,td2,td3,td4);
         tbody.appendChild(tr);
       }
+
       counter.textContent = `${visible} affiché(s) / ${total} — ${totalReserved} coché(s)`;
+      const es = document.getElementById('emptyState');
+      if (es){ es.classList.toggle('hidden', visible !== 0); }
     }
 
     function toggleReserved(id){
@@ -236,34 +233,33 @@
       rootRef.child(id).update({ reserved: now, reservedAt: now ? Date.now() : null });
     }
 
-    // Add item (via modal)
+    // Add item
     addForm.addEventListener('submit', (e)=>{
       e.preventDefault();
       const fd = new FormData(addForm);
       const data = {
         name: (fd.get('name')||'').toString().trim(),
         price: (fd.get('price')||'').toString().trim(),
-        url: (fd.get('url')||'').toString().trim(),
-        alts: (fd.get('alts')||'').toString().trim(),
-        
+        url:   (fd.get('url')||'').toString().trim(),
+        alts:  (fd.get('alts')||'').toString().trim(),
         reserved: false,
         createdAt: Date.now()
       };
-      rootRef.push().set(data).then(()=>{
-        addForm.reset(); modal.classList.add('hidden');
-      });
+      rootRef.push().set(data)
+        .then(()=>{ addForm.reset(); closeModal(); })
+        .catch(err=>{ alert('Ajout impossible: ' + (err && err.message ? err.message : err)); });
     });
 
-    // Filtres
+    // Filters
     for (const el of [filterReserved, filterSearch]) el.addEventListener('input', render);
 
-    // Live listeners (fiables)
+    // Live listeners
     rootRef.on('value', snap => {
       const val = snap.val() || {};
-      // copié proprement (évite propriété interne path.pieces_ vu sur certaines versions)
-      allItems = {};
-      Object.keys(val).forEach(id => allItems[id] = { id, ...val[id] });
+      allItems = {}; Object.keys(val).forEach(id => allItems[id] = { id, ...val[id] });
       render();
+    }, (err)=>{
+      alert('Connexion Firebase échouée : ' + (err && err.message ? err.message : err));
     });
   </script>
 </body>
