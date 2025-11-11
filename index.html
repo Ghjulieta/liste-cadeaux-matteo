@@ -10,70 +10,55 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
     html,body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
-    .row-checked{filter:grayscale(1);opacity:.6}
-    .line-through-if-checked input:checked+span{ text-decoration: line-through; }
+    .row-checked{filter:grayscale(1); opacity:.55}
+    .pretty-card{background:linear-gradient(180deg,#fff, #fafbfd); box-shadow:0 4px 22px rgba(2,6,23,.08)}
+    .pill{display:inline-block;padding:.25rem .6rem;border-radius:9999px;font-size:.72rem;background:#eef2ff;color:#3730a3}
   </style>
-  <!-- Firebase (Compat for simplicity in a single file) -->
+  <!-- Firebase (Compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
 </head>
 <body class="bg-slate-50 min-h-screen">
-  <div class="max-w-5xl mx-auto p-6">
-    <header class="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+  <div class="max-w-4xl mx-auto p-6">
+    <header class="flex items-center justify-between gap-4">
       <div>
         <h1 class="text-2xl md:text-3xl font-bold">🎁 Liste de cadeaux — Noël & Anniversaire</h1>
-        <p class="text-slate-600">Partage le lien. Tout le monde peut cocher en direct. Les lignes cochées se grisent automatiquement.</p>
+        <p class="text-slate-600">Partage le lien. Chacun coche ou clique sur le lien, point barre.</p>
       </div>
-      <div class="flex items-center gap-2">
-        <label class="text-sm text-slate-600">Ton prénom</label>
-        <input id="nickname" class="border rounded-lg px-3 py-2 text-sm" placeholder="ex: Juliette" />
+      <div class="hidden md:block">
+        <span class="pill">Synchronisation en direct</span>
       </div>
     </header>
 
-    <!-- Controls -->
-    <section class="mt-6 grid md:grid-cols-2 gap-4">
-      <div class="bg-white rounded-2xl shadow p-4">
-        <h2 class="font-semibold mb-3">Ajouter un cadeau</h2>
-        <form id="addForm" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <input required name="name" class="border rounded-lg px-3 py-2" placeholder="Nom du jouet" />
-          <input name="price" class="border rounded-lg px-3 py-2" placeholder="Prix (ex: 29,99€)" />
-          <input name="url" type="url" class="border rounded-lg px-3 py-2 md:col-span-2" placeholder="Lien vers le produit (URL)" />
-          <input name="alts" class="border rounded-lg px-3 py-2 md:col-span-2" placeholder="Autres magasins (séparés par des virgules)" />
-          <select name="category" class="border rounded-lg px-3 py-2"><option>Noël</option><option>Anniversaire</option></select>
-          <button class="bg-slate-900 text-white rounded-xl px-4 py-2 hover:bg-slate-800" type="submit">Ajouter</button>
-        </form>
-      </div>
-      <div class="bg-white rounded-2xl shadow p-4">
-        <h2 class="font-semibold mb-3">Filtres</h2>
-        <div class="flex flex-wrap gap-2 items-center">
-          <select id="filterCategory" class="border rounded-lg px-3 py-2">
-            <option value="">Toutes catégories</option>
-            <option value="Noël">Noël</option>
-            <option value="Anniversaire">Anniversaire</option>
-          </select>
-          <select id="filterReserved" class="border rounded-lg px-3 py-2">
-            <option value="all">Tous</option>
-            <option value="no">Non réservés</option>
-            <option value="yes">Réservés</option>
-          </select>
-          <input id="filterSearch" class="border rounded-lg px-3 py-2 flex-1" placeholder="Rechercher…" />
-        </div>
-        <p class="text-sm text-slate-500 mt-2" id="counter"></p>
+    <!-- Filtres minimalistes -->
+    <section class="mt-6 pretty-card rounded-2xl p-4">
+      <div class="flex flex-wrap items-center gap-2">
+        <select id="filterCategory" class="border rounded-lg px-3 py-2">
+          <option value="">Toutes catégories</option>
+          <option value="Noël">Noël</option>
+          <option value="Anniversaire">Anniversaire</option>
+        </select>
+        <select id="filterReserved" class="border rounded-lg px-3 py-2">
+          <option value="all">Tous</option>
+          <option value="no">Non cochés</option>
+          <option value="yes">Cochés</option>
+        </select>
+        <input id="filterSearch" class="border rounded-lg px-3 py-2 flex-1 min-w-[200px]" placeholder="Rechercher un jouet…" />
+        <span class="text-sm text-slate-500" id="counter"></span>
       </div>
     </section>
 
-    <!-- Table -->
-    <section class="mt-6 bg-white rounded-2xl shadow overflow-hidden">
+    <!-- Liste -->
+    <section class="mt-6 pretty-card rounded-2xl overflow-hidden">
       <div class="overflow-x-auto">
         <table class="min-w-full text-sm">
           <thead class="bg-slate-100 text-slate-700">
             <tr>
-              <th class="text-left px-4 py-3 w-10">OK</th>
+              <th class="text-left px-4 py-3 w-12">OK</th>
               <th class="text-left px-4 py-3">Nom du jouet</th>
               <th class="text-left px-4 py-3">Prix</th>
               <th class="text-left px-4 py-3">Magasin(s) alternatif(s)</th>
               <th class="text-left px-4 py-3">Catégorie</th>
-              <th class="text-left px-4 py-3">Réservé par</th>
               <th class="text-left px-4 py-3 w-10"></th>
             </tr>
           </thead>
@@ -82,13 +67,37 @@
       </div>
     </section>
 
-    <footer class="text-xs text-slate-500 mt-6">
-      <p>Astuce : envoie ce même fichier sur GitHub Pages, Netlify ou ton hébergeur. C'est tout ✨</p>
+    <footer class="text-xs text-slate-500 mt-6 text-center">
+      <p>Astuce : tu peux créer plusieurs listes avec l'URL, ex. <code>?list=noel</code> et <code>?list=anniv</code>.</p>
     </footer>
   </div>
 
+  <!-- Bouton + flottant -->
+  <button id="fab" class="fixed bottom-5 right-5 rounded-full w-14 h-14 flex items-center justify-center text-white text-2xl shadow-xl bg-slate-900 hover:bg-slate-800" title="Ajouter un cadeau">＋</button>
+
+  <!-- Modal ajout -->
+  <div id="modal" class="fixed inset-0 bg-black/40 hidden items-end sm:items-center justify-center p-4">
+    <div class="bg-white rounded-2xl w-full max-w-xl p-5 shadow-xl">
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-semibold text-lg">Ajouter un cadeau</h2>
+        <button id="closeModal" class="text-slate-400 hover:text-slate-700">✕</button>
+      </div>
+      <form id="addForm" class="grid grid-cols-1 gap-3">
+        <input required name="name" class="border rounded-lg px-3 py-2" placeholder="Nom du jouet" />
+        <input name="price" class="border rounded-lg px-3 py-2" placeholder="Prix (ex: 29,99€)" />
+        <input name="url" type="url" class="border rounded-lg px-3 py-2" placeholder="Lien vers le produit (URL)" />
+        <input name="alts" class="border rounded-lg px-3 py-2" placeholder="Autres magasins (séparés par des virgules)" />
+        <select name="category" class="border rounded-lg px-3 py-2"><option>Noël</option><option>Anniversaire</option></select>
+        <div class="flex gap-2 justify-end mt-2">
+          <button type="button" id="cancelAdd" class="px-4 py-2 rounded-lg border">Annuler</button>
+          <button class="px-4 py-2 rounded-lg bg-slate-900 text-white hover:bg-slate-800" type="submit">Ajouter</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <script>
-    // 1) RENSEIGNE ICI ta config Firebase (Projet > Paramètres > SDK Web)
+    // --- Firebase config (déjà personnalisée) ---
     const firebaseConfig = {
       apiKey: "AIzaSyAvUXd1GMRaPf0IQYk9wFikRZWMm-Z3v_Y",
       authDomain: "listecadeaux-86625.firebaseapp.com",
@@ -99,50 +108,49 @@
       appId: "1:129398815279:web:3910f8f8f7090062c3d7821a"
     };
 
-    // 2) ID DE LISTE (permet plusieurs listes si tu veux : ?list=foo)
     const params = new URLSearchParams(location.search);
     const LIST_ID = params.get('list') || 'liste-principale';
 
-    // --- Init Firebase Realtime Database ---
+    // Init Firebase
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const rootRef = db.ref(`giftlists/${LIST_ID}/items`);
 
-    // UI state
-    const nicknameInput = document.getElementById('nickname');
-    nicknameInput.value = localStorage.getItem('nickname') || '';
-    nicknameInput.addEventListener('input', ()=> localStorage.setItem('nickname', nicknameInput.value.trim()));
-
+    // UI refs
     const tbody = document.getElementById('tbody');
-    const addForm = document.getElementById('addForm');
     const filterCategory = document.getElementById('filterCategory');
     const filterReserved = document.getElementById('filterReserved');
     const filterSearch = document.getElementById('filterSearch');
     const counter = document.getElementById('counter');
 
+    const modal = document.getElementById('modal');
+    const fab = document.getElementById('fab');
+    const closeModal = document.getElementById('closeModal');
+    const cancelAdd = document.getElementById('cancelAdd');
+    const addForm = document.getElementById('addForm');
+
+    fab.onclick = ()=> modal.classList.remove('hidden');
+    closeModal.onclick = cancelAdd.onclick = ()=> modal.classList.add('hidden');
+
     let allItems = {};
 
-    // Render
-    function render() {
+    function render(){
       const cat = filterCategory.value;
       const res = filterReserved.value; // all | yes | no
       const q = filterSearch.value.toLowerCase().trim();
-
-      const entries = Object.entries(allItems)
-        .map(([id, x]) => ({id, ...x}))
+      const entries = Object.entries(allItems).map(([id,x])=>({id, ...x}))
         .sort((a,b)=> (a.reserved===true) - (b.reserved===true) || (a.name||'').localeCompare(b.name||''));
 
       tbody.innerHTML = '';
-      let visible = 0, reserved = 0, total = entries.length;
+      let visible=0, total=entries.length, totalReserved=0;
 
       for(const it of entries){
         if (cat && it.category !== cat) continue;
-        if (res === 'yes' && !it.reserved) continue;
-        if (res === 'no' && it.reserved) continue;
+        if (res==='yes' && !it.reserved) continue;
+        if (res==='no' && it.reserved) continue;
         const hay = `${it.name||''} ${it.price||''} ${it.alts||''} ${it.category||''}`.toLowerCase();
         if (q && !hay.includes(q)) continue;
-        visible++;
-        if (it.reserved) reserved++;
+        visible++; if (it.reserved) totalReserved++;
 
         const tr = document.createElement('tr');
         tr.className = it.reserved ? 'row-checked' : '';
@@ -156,103 +164,55 @@
         cb.addEventListener('change',()=>toggleReserved(it.id));
         td0.appendChild(cb);
 
-        // name (clickable)
+        // name + link
         const td1 = document.createElement('td');
-        td1.className='px-4 py-3 align-top line-through-if-checked';
-        const nameWrap = document.createElement('div');
+        td1.className='px-4 py-3 align-top';
         const nameLink = document.createElement('a');
         nameLink.className='font-semibold hover:underline';
-        nameLink.target='_blank';
-        nameLink.rel='noopener';
+        nameLink.target='_blank'; nameLink.rel='noopener';
         nameLink.textContent = it.name || '(sans nom)';
-        if (it.url) nameLink.href = it.url; else nameLink.href = 'javascript:void(0)';
-        nameWrap.appendChild(nameLink);
+        nameLink.href = it.url || 'javascript:void(0)';
+        td1.appendChild(nameLink);
         if (it.url){
           const urlSmall = document.createElement('div');
           urlSmall.className='text-xs text-slate-500 truncate max-w-[420px]';
-          urlSmall.textContent = it.url;
-          nameWrap.appendChild(urlSmall);
+          urlSmall.textContent = it.url; td1.appendChild(urlSmall);
         }
-        td1.appendChild(nameWrap);
 
-        // price
-        const td2 = document.createElement('td');
-        td2.className='px-4 py-3 align-top';
-        td2.textContent = it.price || '';
+        const td2 = document.createElement('td'); td2.className='px-4 py-3 align-top'; td2.textContent = it.price || '';
 
-        // alts
-        const td3 = document.createElement('td');
-        td3.className='px-4 py-3 align-top';
+        const td3 = document.createElement('td'); td3.className='px-4 py-3 align-top';
         if (it.alts){
           const parts = it.alts.split(',').map(s=>s.trim()).filter(Boolean);
-          const ul = document.createElement('ul');
-          ul.className='list-disc ml-5';
+          const ul = document.createElement('ul'); ul.className='list-disc ml-5';
           for(const p of parts){
-            const li = document.createElement('li');
-            // auto-link if looks like URL
-            if (/^https?:\/\//i.test(p)){
-              const a=document.createElement('a');a.href=p;a.target='_blank';a.rel='noopener';a.className='hover:underline';a.textContent=p;li.appendChild(a);
-            } else { li.textContent = p; }
+            const li=document.createElement('li');
+            if (/^https?:\/\//i.test(p)){ const a=document.createElement('a'); a.href=p; a.target='_blank'; a.rel='noopener'; a.className='hover:underline'; a.textContent=p; li.appendChild(a);} else { li.textContent=p; }
             ul.appendChild(li);
           }
           td3.appendChild(ul);
         }
 
-        // category
-        const td4 = document.createElement('td');
-        td4.className='px-4 py-3 align-top';
-        td4.textContent = it.category || '';
+        const td4 = document.createElement('td'); td4.className='px-4 py-3 align-top'; td4.textContent = it.category || '';
 
-        // reserved by
-        const td5 = document.createElement('td');
-        td5.className='px-4 py-3 align-top';
-        if (it.reserved){
-          const who = it.reservedBy || 'Quelqu\'un';
-          const when = it.reservedAt ? new Date(it.reservedAt).toLocaleString() : '';
-          td5.innerHTML = `<span class="inline-block rounded-full bg-emerald-50 text-emerald-700 px-2 py-0.5 text-xs">${who}</span>` + (when? `<div class="text-xs text-slate-500 mt-1">${when}</div>`:'');
-        } else {
-          td5.innerHTML = '<span class="text-slate-400">—</span>';
-        }
+        const td5 = document.createElement('td'); td5.className='px-4 py-3 align-top';
+        const del = document.createElement('button'); del.className='text-slate-400 hover:text-red-600'; del.title='Supprimer'; del.textContent='✕';
+        del.addEventListener('click',()=>{ if(confirm('Supprimer cet élément ?')) rootRef.child(it.id).remove(); });
+        td5.appendChild(del);
 
-        // actions
-        const td6 = document.createElement('td');
-        td6.className='px-4 py-3 align-top';
-        const del = document.createElement('button');
-        del.className='text-slate-400 hover:text-red-600';
-        del.title='Supprimer';
-        del.textContent='✕';
-        del.addEventListener('click',()=>{
-          if(confirm('Supprimer cet élément ?')) db.ref(`${rootRef.path.pieces_.join('/')}/${it.id}`).remove();
-        });
-        td6.appendChild(del);
-
-        tr.append(td0,td1,td2,td3,td4,td5,td6);
+        tr.append(td0,td1,td2,td3,td4,td5);
         tbody.appendChild(tr);
-        // strike-through by CSS sibling rule
-        if (cb.checked){
-          const span = document.createElement('span'); // to trigger .line-through-if-checked
-          // Insert dummy span after checkbox? Instead: wrap name with sibling not possible; using grayscale + opacity already.
-        }
       }
-
-      const totalReserved = entries.filter(x=>x.reserved).length;
-      counter.textContent = `${visible} affiché(s) / ${total} total — ${totalReserved} réservé(s)`;
+      counter.textContent = `${visible} affiché(s) / ${total} — ${totalReserved} coché(s)`;
     }
 
-    // Toggle reserved
     function toggleReserved(id){
-      const it = allItems[id];
-      if (!it) return;
-      const nowRes = !it.reserved;
-      const who = (nicknameInput.value || '').trim() || 'Quelqu\'un';
-      db.ref(`${rootRef.path.pieces_.join('/')}/${id}`).update({
-        reserved: nowRes,
-        reservedBy: nowRes ? who : null,
-        reservedAt: nowRes ? Date.now() : null
-      });
+      const it = allItems[id]; if (!it) return;
+      const now = !it.reserved;
+      rootRef.child(id).update({ reserved: now, reservedAt: now ? Date.now() : null });
     }
 
-    // Add item
+    // Add item (via modal)
     addForm.addEventListener('submit', (e)=>{
       e.preventDefault();
       const fd = new FormData(addForm);
@@ -265,24 +225,22 @@
         reserved: false,
         createdAt: Date.now()
       };
-      const ref = rootRef.push();
-      ref.set(data);
-      addForm.reset();
+      rootRef.push().set(data).then(()=>{
+        addForm.reset(); modal.classList.add('hidden');
+      });
     });
 
-    // Filters
-    for (const el of [filterCategory, filterReserved, filterSearch]){
-      el.addEventListener('input', render);
-    }
+    // Filtres
+    for (const el of [filterCategory, filterReserved, filterSearch]) el.addEventListener('input', render);
 
-    // Live listeners
+    // Live listeners (fiables)
     rootRef.on('value', snap => {
-      allItems = snap.val() || {};
-      // Add id field for each
-      Object.keys(allItems).forEach(id => allItems[id].id = id);
+      const val = snap.val() || {};
+      // copié proprement (évite propriété interne path.pieces_ vu sur certaines versions)
+      allItems = {};
+      Object.keys(val).forEach(id => allItems[id] = { id, ...val[id] });
       render();
     });
-
   </script>
 </body>
 </html>
