@@ -3,99 +3,127 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Noël & Anniversaire de Matteo</title>
+  <title>Liste cadeaux — Noël & Anniversaire</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
   <style>
-    :root{ --navy:#0b1f3a; --navy-2:#09223f; --ink:#e6edff; }
+    :root{ --navy:#0b1f3a; --navy-2:#09223f; }
     html,body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
 
-    /* --- Fond bleu marine + dinos --- */
-    body{
-      background-color:var(--navy) !important;
-      background-image:url('bg-dinos.png') !important; /* ✅ mets bg-dinos.png à la racine du repo */
-      background-repeat:repeat; background-size:700px auto; background-attachment:fixed;
-    }
+    /* Fond bleu + dinos */
+    body{ background:#0b1f3a url('bg-dinos.png') repeat fixed; background-size:700px auto; }
 
-    /* --- Cartes & look --- */
-    .pretty-card{background:#0b1f3acc; border:1px solid rgba(255,255,255,.12); box-shadow:0 10px 30px rgba(0,0,0,.25); backdrop-filter: blur(6px);} /* navy translucide */
-    .white-card{background:#ffffff; box-shadow:0 12px 30px rgba(2,6,23,.12); border:1px solid rgba(2,6,23,.06)}
+    /* Cartes / filtres */
+    .pretty{background:linear-gradient(135deg,var(--navy-2),var(--navy)); color:#fff;
+            border:1px solid rgba(255,255,255,.12); box-shadow:0 10px 30px rgba(0,0,0,.25);
+            backdrop-filter: blur(6px); border-radius:22px;}
+    .pill{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.22); color:#e6edff; padding:.65rem 1rem; border-radius:9999px; backdrop-filter:blur(6px)}
+    .pill::placeholder{color:#cbd5ff99}
+    .pill:focus{outline:none; box-shadow:0 0 0 3px rgba(230,237,255,.18); border-color:#cbd5ff80}
+    select.pill{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%, #cbd5ff 50%),linear-gradient(135deg,#cbd5ff 50%,transparent 50%);background-position:calc(100% - 18px) 52%, calc(100% - 12px) 52%;background-size:6px 6px;background-repeat:no-repeat;padding-right:2.2rem}
+
+    /* Tableau navy */
+    .table-wrap{border-radius:20px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    thead.navy{background:linear-gradient(135deg,var(--navy-2),var(--navy)); color:#fff}
+    tbody.navy tr{background:rgba(255,255,255,.14)}
+    tbody.navy tr:nth-child(even){background:rgba(255,255,255,.16)}
+    tbody.navy tr:hover{background:rgba(255,255,255,.20)}
+    tbody.navy td{color:#eaf1ff}
     .row-checked{filter:grayscale(1); opacity:.55}
 
-    /* --- Inputs style pilule --- */
-    .control{appearance:none;-webkit-appearance:none;-moz-appearance:none; background:rgba(255,255,255,.08)!important; border:1px solid rgba(255,255,255,.25)!important; color:#e6edff!important; padding:.65rem 1rem; border-radius:9999px; backdrop-filter:blur(6px);}
-    .control::placeholder{color:#cbd5ff99}
-    .control:focus{outline:none; box-shadow:0 0 0 3px rgba(230,237,255,.18); border-color:#cbd5ff80!important}
-    select.control{background-image:linear-gradient(45deg,transparent 50%, #cbd5ff 50%),linear-gradient(135deg,#cbd5ff 50%,transparent 50%),linear-gradient(to right, rgba(255,255,255,.12), rgba(255,255,255,.12));background-position:calc(100% - 18px) calc(50% + 2px),calc(100% - 12px) calc(50% + 2px),calc(100% - 2.5rem) 0.8rem;background-size:6px 6px,6px 6px,1px 1.2rem;background-repeat:no-repeat;padding-right:2.6rem}
-    .control option{background:#0b1f3a;color:#e6edff}
+    /* Lien produit mis en avant (souligné, pas gras) */
+    tbody.navy a.name{color:#cfe1ff; text-decoration:underline; text-underline-offset:2px; text-decoration-thickness:2px}
+    tbody.navy a.name:hover{opacity:.9}
 
-    /* --- Table --- */
-    thead th{font-weight:700}
-    .table-wrap{border-radius:20px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.25)}
-    .thead-navy{background:linear-gradient(135deg,var(--navy-2),var(--navy)); color:white; border-bottom:1px solid rgba(255,255,255,.12)}
+    /* Magasins en puces/badges */
+    ul.stores{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.25rem}
+    ul.stores li{background:rgba(255,255,255,.18);color:#e6edff;border-radius:9999px;padding:.28rem .6rem;list-style:none}
+    ul.stores li a{color:#e9f1ff}
 
-    a{color:#cdd9ff}
-  .dark-table tbody tr{background:rgba(255,255,255,.06)}
-    .dark-table tbody tr:hover{background:rgba(255,255,255,.09)}
-    .dark-table td{color:#e6edff}
-    .dark-table td .text-slate-500{color:#cbd5ff99}
-    .dark-table input[type=checkbox]{accent-color:#cdd9ff}
-    </style>
+    /* Desktop par défaut */
+    table thead{display:table-header-group}
+    tbody.navy tr{display:table-row}
+    tbody.navy td{display:table-cell; padding:.75rem 1rem}
+
+    /* Mobile: même logique, 3 colonnes / 2 lignes, sans scroll horizontal */
+    body.is-mobile table thead{display:table-header-group}
+    body.is-mobile tbody.navy tr{
+      display:grid; grid-template-columns:38px 1fr auto; grid-template-rows:auto auto;
+      gap:6px 12px; padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.12)
+    }
+    body.is-mobile tbody.navy td{display:block; padding:0; color:#e6edff}
+    body.is-mobile td[data-label="OK"]{grid-column:1; grid-row:1 / span 2; display:flex; align-items:center}
+    body.is-mobile td[data-label="OK"] input{transform:scale(1.15)}
+    body.is-mobile td[data-label="Nom"]{grid-column:2; grid-row:1}
+    body.is-mobile td[data-label="Prix"]{grid-column:3; grid-row:1; text-align:right; font-weight:700}
+    body.is-mobile td[data-label="Magasins"]{grid-column:2 / 4; grid-row:2}
+    body.is-mobile td.cell-actions{display:none}
+  </style>
+
   <!-- Firebase (Compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+  <script>
+    // Active/désactive le layout mobile de façon fiable
+    function applyMobileMode(){ document.body.classList.toggle('is-mobile', window.innerWidth <= 600); }
+    window.addEventListener('resize', applyMobileMode);
+    document.addEventListener('DOMContentLoaded', applyMobileMode);
+  </script>
 </head>
 <body class="min-h-screen">
   <div class="max-w-5xl mx-auto p-6">
     <!-- Header -->
-    <header class="rounded-3xl p-6 md:p-7 pretty-card text-white">
-      <h1 class="text-2xl md:text-3xl font-extrabold">🦖 Noël & Anniversaire de Matteo</h1>
+    <header class="pretty p-6 md:p-7">
+      <h1 class="text-2xl md:text-3xl font-extrabold">🦕 Liste de cadeaux — Noël & Anniversaire</h1>
+      <p class="text-white/85">Partage le lien. Chacun coche ou clique sur le lien — simple comme bonjour.</p>
     </header>
 
     <!-- Filtres -->
-    <!-- Filtres -->
-    <section class="mt-6 rounded-3xl pretty-card p-4">
+    <section class="pretty p-4 mt-6">
       <div class="flex flex-wrap items-center gap-3">
-        <select id="filterReserved" class="control">
+        <select id="filterReserved" class="pill">
           <option value="all">Tous</option>
           <option value="no">Non cochés</option>
           <option value="yes">Cochés</option>
         </select>
-        <input id="filterSearch" class="control flex-1 min-w-[220px]" placeholder="Rechercher un cadeau…" />
+        <input id="filterSearch" class="pill flex-1 min-w-[220px]" placeholder="Rechercher un jouet…" />
         <span class="text-sm text-white/80" id="counter"></span>
       </div>
     </section>
 
-    <!-- Tableau -->
-    <section class="mt-6 table-wrap pretty-card p-0">
-      <table class="min-w-full text-sm dark-table">
-        <thead class="thead-navy">
+    <!-- Tableau navy -->
+    <section class="mt-6 table-wrap">
+      <table class="min-w-full text-sm">
+        <thead class="navy">
           <tr>
             <th class="text-left px-4 py-3 w-12">OK</th>
-            <th class="text-left px-4 py-3">Nom du cadeau</th>
+            <th class="text-left px-4 py-3">Nom du jouet</th>
             <th class="text-left px-4 py-3">Prix</th>
             <th class="text-left px-4 py-3">Magasin(s) alternatif(s)</th>
             <th class="text-left px-4 py-3 w-10"></th>
           </tr>
         </thead>
-        <tbody id="tbody" class="divide-y"></tbody>
+        <tbody id="tbody" class="navy divide-y divide-white/10"></tbody>
       </table>
-        <div id="emptyState" class="text-center text-white/80 py-10 hidden">Aucun cadeau à afficher pour le moment.</div>
+      <div id="emptyState" class="text-center text-white/90 py-10 hidden">Aucun jouet à afficher pour le moment.</div>
     </section>
 
+    <footer class="text-xs text-white/85 mt-6 text-center">
+      Astuce : l’ajout se fait avec le bouton <strong>＋</strong> en bas à droite.
+    </footer>
   </div>
 
-  <!-- FAB -->
-  <button id="fab" class="fixed bottom-5 right-5 z-50 rounded-full w-14 h-14 flex items-center justify-center text-white text-2xl shadow-2xl" style="background:var(--navy);" onclick="document.getElementById('modal').classList.remove('hidden')">＋</button>
+  <!-- Bouton + -->
+  <button id="fab" class="fixed bottom-5 right-5 z-50 rounded-full w-14 h-14 flex items-center justify-center text-white text-2xl shadow-2xl" style="background:var(--navy);">＋</button>
 
   <!-- Modal -->
-  <div id="modal" class="fixed inset-0 bg-black/60 hidden flex items-end sm:items-center justify-center p-4 z-50" onclick="if(event.target===this){this.classList.add('hidden')}">
+  <div id="modal" class="fixed inset-0 bg-black/60 hidden flex items-end sm:items-center justify-center p-4 z-50">
     <div class="bg-white rounded-2xl w-full max-w-xl p-5 shadow-xl">
       <div class="flex items-center justify-between mb-3">
         <h2 class="font-semibold text-lg">Ajouter un cadeau</h2>
-        <button id="closeModal" class="text-slate-400 hover:text-slate-700" aria-label="Fermer" onclick="document.getElementById('modal').classList.add('hidden')">✕</button>
+        <button id="closeModal" class="text-slate-400 hover:text-slate-700" aria-label="Fermer">✕</button>
       </div>
       <form id="addForm" class="grid grid-cols-1 gap-3">
         <input required name="name" class="border rounded-lg px-3 py-2" placeholder="Nom du jouet" />
@@ -111,7 +139,7 @@
   </div>
 
   <script>
-    // --- Firebase config (déjà personnalisée) ---
+    // --- Firebase config ---
     const firebaseConfig = {
       apiKey: "AIzaSyAvUXd1GMRaPf0IQYk9wFikRZWMm-Z3v_Y",
       authDomain: "listecadeaux-86625.firebaseapp.com",
@@ -121,31 +149,27 @@
       messagingSenderId: "129398815279",
       appId: "1:129398815279:web:3910f8f8f7090062c3d7821a"
     };
+    const LIST_ID = new URLSearchParams(location.search).get('list') || 'liste-principale';
 
-    const params = new URLSearchParams(location.search);
-    const LIST_ID = params.get('list') || 'liste-principale';
-
-    // Firebase
     const app = firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const rootRef = db.ref(`giftlists/${LIST_ID}/items`);
 
-    // --- UI elements ---
+    // Refs UI
     const tbody = document.getElementById('tbody');
     const filterReserved = document.getElementById('filterReserved');
     const filterSearch = document.getElementById('filterSearch');
     const counter = document.getElementById('counter');
-
+    const emptyState = document.getElementById('emptyState');
     const modal = document.getElementById('modal');
     const fab = document.getElementById('fab');
     const closeModalBtn = document.getElementById('closeModal');
     const cancelAdd = document.getElementById('cancelAdd');
     const addForm = document.getElementById('addForm');
 
-    // --- Modal open/close (solide) ---
+    // Modal
     const openModal = ()=> modal.classList.remove('hidden');
     const closeModal = ()=> modal.classList.add('hidden');
-    modal.classList.add('hidden'); // caché par défaut
     fab.addEventListener('click', openModal);
     closeModalBtn.addEventListener('click', closeModal);
     cancelAdd.addEventListener('click', closeModal);
@@ -173,48 +197,46 @@
         const tr = document.createElement('tr');
         tr.className = it.reserved ? 'row-checked' : '';
 
-        // checkbox
+        // OK
         const td0 = document.createElement('td');
-        td0.className='px-4 py-3 align-top';
+        td0.className='px-4 py-3 align-top'; td0.setAttribute('data-label','OK');
         const cb = document.createElement('input');
         cb.type='checkbox'; cb.checked = !!it.reserved;
         cb.addEventListener('change',()=>toggleReserved(it.id));
         td0.appendChild(cb);
 
-        // name + link
+        // Nom (nom cliquable — pas d'URL brute)
         const td1 = document.createElement('td');
-        td1.className='px-4 py-3 align-top';
+        td1.className='px-4 py-3 align-top'; td1.setAttribute('data-label','Nom');
         const nameLink = document.createElement('a');
-        nameLink.className='font-semibold hover:underline';
+        nameLink.className='name hover:underline';
         nameLink.target='_blank'; nameLink.rel='noopener';
         nameLink.textContent = it.name || '(sans nom)';
         nameLink.href = it.url || 'javascript:void(0)';
         td1.appendChild(nameLink);
-        if (it.url){
-          const urlSmall = document.createElement('div');
-          urlSmall.className='text-xs text-slate-500 truncate max-w-[420px]';
-          urlSmall.textContent = it.url; td1.appendChild(urlSmall);
-        }
 
-        // price
-        const td2 = document.createElement('td'); td2.className='px-4 py-3 align-top'; td2.textContent = it.price || '';
+        // Prix
+        const td2 = document.createElement('td'); td2.className='px-4 py-3 align-top'; td2.setAttribute('data-label','Prix');
+        td2.textContent = it.price || '';
 
-        // alts
-        const td3 = document.createElement('td'); td3.className='px-4 py-3 align-top';
+        // Magasins → chips
+        const td3 = document.createElement('td'); td3.className='px-4 py-3 align-top'; td3.setAttribute('data-label','Magasins');
         if (it.alts){
           const parts = it.alts.split(',').map(s=>s.trim()).filter(Boolean);
-          const ul = document.createElement('ul'); ul.className='list-disc ml-5';
+          const ul = document.createElement('ul'); ul.className='stores';
           for(const p of parts){
             const li=document.createElement('li');
-            if (/^https?:\/\//i.test(p)){ const a=document.createElement('a'); a.href=p; a.target='_blank'; a.rel='noopener'; a.className='hover:underline'; a.textContent=p; li.appendChild(a);} else { li.textContent=p; }
+            if (/^https?:\/\//i.test(p)){
+              const a=document.createElement('a'); a.href=p; a.target='_blank'; a.rel='noopener'; a.className='hover:underline'; a.textContent=p; li.appendChild(a);
+            } else { li.textContent=p; }
             ul.appendChild(li);
           }
           td3.appendChild(ul);
         }
 
-        // actions
-        const td4 = document.createElement('td'); td4.className='px-4 py-3 align-top';
-        const del = document.createElement('button'); del.className='text-white/70 hover:text-red-400'; del.title='Supprimer'; del.textContent='✕';
+        // Supprimer (caché en mobile)
+        const td4 = document.createElement('td'); td4.className='px-4 py-3 align-top cell-actions';
+        const del = document.createElement('button'); del.className='text-slate-300 hover:text-red-500'; del.title='Supprimer'; del.textContent='✕';
         del.addEventListener('click',()=>{ if(confirm('Supprimer cet élément ?')) rootRef.child(it.id).remove(); });
         td4.appendChild(del);
 
@@ -223,8 +245,7 @@
       }
 
       counter.textContent = `${visible} affiché(s) / ${total} — ${totalReserved} coché(s)`;
-      const es = document.getElementById('emptyState');
-      if (es){ es.classList.toggle('hidden', visible !== 0); }
+      emptyState.classList.toggle('hidden', visible !== 0);
     }
 
     function toggleReserved(id){
@@ -233,7 +254,7 @@
       rootRef.child(id).update({ reserved: now, reservedAt: now ? Date.now() : null });
     }
 
-    // Add item
+    // Ajout
     addForm.addEventListener('submit', (e)=>{
       e.preventDefault();
       const fd = new FormData(addForm);
@@ -247,20 +268,18 @@
       };
       rootRef.push().set(data)
         .then(()=>{ addForm.reset(); closeModal(); })
-        .catch(err=>{ alert('Ajout impossible: ' + (err && err.message ? err.message : err)); });
+        .catch(err=> alert('Ajout impossible : ' + (err?.message || err)));
     });
 
-    // Filters
+    // Filtres
     for (const el of [filterReserved, filterSearch]) el.addEventListener('input', render);
 
-    // Live listeners
+    // Live
     rootRef.on('value', snap => {
       const val = snap.val() || {};
       allItems = {}; Object.keys(val).forEach(id => allItems[id] = { id, ...val[id] });
       render();
-    }, (err)=>{
-      alert('Connexion Firebase échouée : ' + (err && err.message ? err.message : err));
-    });
+    }, err => alert('Connexion Firebase échouée : ' + (err?.message || err)));
   </script>
 </body>
 </html>
