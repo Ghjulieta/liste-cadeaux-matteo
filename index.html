@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+
   <style>
     :root{ --navy:#0b1f3a; --navy-2:#09223f; }
     html,body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif}
@@ -16,68 +17,144 @@
     body{ background:#0b1f3a url('bg-dinos.png') repeat fixed; background-size:700px auto; }
 
     /* Cartes / filtres */
-    .pretty{background:linear-gradient(135deg,var(--navy-2),var(--navy)); color:#fff;
-            border:1px solid rgba(255,255,255,.12); box-shadow:0 10px 30px rgba(0,0,0,.25);
-            backdrop-filter: blur(6px); border-radius:22px;}
-    .pill{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.22); color:#e6edff; padding:.65rem 1rem; border-radius:9999px; backdrop-filter:blur(6px)}
+    .pretty{
+      background:linear-gradient(135deg,var(--navy-2),var(--navy));
+      color:#fff;
+      border:1px solid rgba(255,255,255,.12);
+      box-shadow:0 10px 30px rgba(0,0,0,.25);
+      backdrop-filter: blur(6px);
+      border-radius:22px;
+    }
+    .pill{
+      background:rgba(255,255,255,.08);
+      border:1px solid rgba(255,255,255,.22);
+      color:#e6edff;
+      padding:.65rem 1rem;
+      border-radius:9999px;
+      backdrop-filter:blur(6px)
+    }
     .pill::placeholder{color:#cbd5ff99}
     .pill:focus{outline:none; box-shadow:0 0 0 3px rgba(230,237,255,.18); border-color:#cbd5ff80}
-    select.pill{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%, #cbd5ff 50%),linear-gradient(135deg,#cbd5ff 50%,transparent 50%);background-position:calc(100% - 18px) 52%, calc(100% - 12px) 52%;background-size:6px 6px;background-repeat:no-repeat;padding-right:2.2rem}
+    select.pill{
+      appearance:none;-webkit-appearance:none;
+      background-image:linear-gradient(45deg,transparent 50%, #cbd5ff 50%),linear-gradient(135deg,#cbd5ff 50%,transparent 50%);
+      background-position:calc(100% - 18px) 52%, calc(100% - 12px) 52%;
+      background-size:6px 6px;background-repeat:no-repeat;padding-right:2.2rem
+    }
 
     /* Tableau navy */
     .table-wrap{border-radius:20px; overflow:hidden; box-shadow:0 10px 30px rgba(0,0,0,.25)}
     thead.navy{background:linear-gradient(135deg,var(--navy-2),var(--navy)); color:#fff}
-    tbody.navy tr{background:rgba(255,255,255,.14)}
-    tbody.navy tr:nth-child(even){background:rgba(255,255,255,.16)}
-    tbody.navy tr:hover{background:rgba(255,255,255,.20)}
+    tbody.navy tr{background:rgba(255,255,255,.14)}           /* fond unique (pas d’alternance) */
     tbody.navy td{color:#eaf1ff}
     .row-checked{filter:grayscale(1); opacity:.55}
 
     /* Lien produit mis en avant (souligné, pas gras) */
-    tbody.navy a.name{color:#cfe1ff; text-decoration:underline; text-underline-offset:2px; text-decoration-thickness:2px}
+    tbody.navy a.name{
+      color:#cfe1ff; text-decoration:underline; text-underline-offset:2px; text-decoration-thickness:2px
+    }
     tbody.navy a.name:hover{opacity:.9}
 
-    /* Magasins en puces/badges */
-    ul.stores{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.25rem}
+    /* Magasins (chips) */
+    ul.stores{display:flex;flex-wrap:wrap;gap:.45rem;margin-top:.4rem}
     ul.stores li{background:rgba(255,255,255,.18);color:#e6edff;border-radius:9999px;padding:.28rem .6rem;list-style:none}
     ul.stores li a{color:#e9f1ff}
 
-    /* Desktop par défaut */
+    /* Desktop (tableau natif) */
     table thead{display:table-header-group}
     tbody.navy tr{display:table-row}
-    tbody.navy td{display:table-cell; padding:.75rem 1rem}
+    tbody.navy td{display:table-cell; padding:.75rem 1rem; vertical-align:top}
 
-    /* Mobile: même logique, 3 colonnes / 2 lignes, sans scroll horizontal */
-    body.is-mobile table thead{display:table-header-group}
-    body.is-mobile tbody.navy tr{
-      display:grid; grid-template-columns:38px 1fr auto; grid-template-rows:auto auto;
-      gap:6px 12px; padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.12)
+	/* DESKTOP — traits entre les lignes du tableau */
+	@media (min-width: 601px){
+	  .table-wrap tbody tr td{
+		border-bottom: 1px solid rgba(255,255,255,.12); /* même teinte que mobile */
+	  }
+	  .table-wrap tbody tr:last-child td{
+		border-bottom: 0; /* pas de trait sous la dernière ligne */
+	  }
+	}
+
+    /* ---------- MOBILE : L1 = [OK][Nom][Prix] ; L2 = magasins full-width ---------- */
+    @media (max-width: 600px){
+      .table-wrap{
+        display:block; width:100%; overflow:hidden; --row-pad:12px;
+      }
+      .table-wrap table,.table-wrap thead,.table-wrap tbody{display:block}
+
+      /* Entête : 3 colonnes */
+      .table-wrap thead tr{
+        display:grid; grid-template-columns:44px minmax(0,1fr) min-content;
+        gap:8px 12px; padding:12px; align-items:center;
+      }
+      .table-wrap thead th:nth-child(4){display:none}
+
+      /* L1 */
+      .table-wrap tbody tr.rowA{
+        position:relative;
+        display:grid;
+        grid-template-columns:44px minmax(0,1fr) min-content;
+        gap:8px 12px; padding:14px var(--row-pad); box-sizing:border-box;
+        background:rgba(255,255,255,.14) !important;         /* même fond que L2 */
+        border-bottom:0 !important;
+
+        /* full-bleed */
+        margin-left:calc(-1*var(--row-pad));
+        margin-right:calc(-1*var(--row-pad));
+        width:calc(100% + (2*var(--row-pad)));
+      }
+      .table-wrap tbody tr.rowA > td{background:transparent !important}
+      .table-wrap tbody tr.rowA td[data-label="OK"]{display:flex; align-items:flex-start}
+      .table-wrap tbody tr.rowA td[data-label="Prix"]{text-align:right; white-space:nowrap; font-weight:700}
+      .table-wrap tbody tr.rowA a.name{display:inline-block; word-break:break-word}
+
+      /* Croix */
+      .table-wrap tbody tr.rowA td.cell-actions{
+        position:absolute; right:20px; top:2px; display:block; padding:0; margin:0;
+      }
+
+      /* L2 : ligne magasins, même largeur & fond, full-bleed */
+      .table-wrap tbody tr.rowB{
+        display:block;
+        background:rgba(255,255,255,.14) !important;
+        margin-left:calc(-0*var(--row-pad));
+        margin-right:calc(-0*var(--row-pad));
+        width:calc(100% + (1*var(--row-pad)));
+        border-top:1px solid rgba(255,255,255,.10);
+        border-bottom:1px solid rgba(255,255,255,.10);
+      }
+      .table-wrap tbody tr.rowB .stores-cell{padding:8px var(--row-pad) 14px}
+
+      .table-wrap tbody tr.rowB ul.stores{
+        list-style:none; margin:.35rem 0 0 0; padding:0; display:flex; flex-wrap:wrap; gap:.45rem; width:100%; min-width:0;
+      }
     }
-    body.is-mobile tbody.navy td{display:block; padding:0; color:#e6edff}
-    body.is-mobile td[data-label="OK"]{grid-column:1; grid-row:1 / span 2; display:flex; align-items:center}
-    body.is-mobile td[data-label="OK"] input{transform:scale(1.15)}
-    body.is-mobile td[data-label="Nom"]{grid-column:2; grid-row:1}
-    body.is-mobile td[data-label="Prix"]{grid-column:3; grid-row:1; text-align:right; font-weight:700}
-    body.is-mobile td[data-label="Magasins"]{grid-column:2 / 4; grid-row:2}
-    body.is-mobile td.cell-actions{display:none}
   </style>
 
   <!-- Firebase (Compat) -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
   <script>
-    // Active/désactive le layout mobile de façon fiable
-    function applyMobileMode(){ document.body.classList.toggle('is-mobile', window.innerWidth <= 600); }
+    // (Optionnel) forcer l’aperçu mobile avec ?mobile=1
+    function applyMobileMode(){
+      const qp = new URLSearchParams(location.search);
+      const force = qp.get('mobile');
+      const on = force==='1' ? true : (force==='0'? false : (window.innerWidth<=600));
+      document.body.classList.toggle('is-mobile', on);
+    }
     window.addEventListener('resize', applyMobileMode);
     document.addEventListener('DOMContentLoaded', applyMobileMode);
   </script>
 </head>
+
 <body class="min-h-screen">
   <div class="max-w-5xl mx-auto p-6">
     <!-- Header -->
     <header class="pretty p-6 md:p-7">
-      <h1 class="text-2xl md:text-3xl font-extrabold">🦖 Noël & Anniversaire de Matteo</h1>
-      <p class="text-white/85">Pour les vêtements il porte du 98cm ~3ans dans la plupart des enseignes / chaussures 24/25.</p>
+      <h1 class="text-2xl md:text-3xl font-extrabold">🦖 Noël & Anniversaire (15 décembre) de Matteo</h1>
+      <p class="text-white/85">Une petite liste d'idées de cadeaux pour Matteo (0 obligations). 🐾
+      Si jamais vous êtes inspirez niveau shopping il fait du 98 cm ~3ans dans la plupart des magasins.
+      Si vous trouvez une idée dans la liste hésitez pas à cocher la case pour qu'on achète pas plusieurs fois la même chose.</p>
     </header>
 
     <!-- Filtres -->
@@ -93,19 +170,18 @@
       </div>
     </section>
 
-    <!-- Tableau navy -->
+    <!-- Tableau -->
     <section class="mt-6 table-wrap">
       <table class="min-w-full text-sm">
         <thead class="navy">
           <tr>
-            <th class="text-left px-4 py-3 w-12">OK</th>
-            <th class="text-left px-4 py-3">Nom</th>
+            <th class="text-left px-4 py-3 w-12">OK ✔️</th>
+            <th class="text-left px-4 py-3">Idée 🎀</th>
             <th class="text-left px-4 py-3">Prix</th>
-            <th class="text-left px-4 py-3">Boutique(s)</th>
             <th class="text-left px-4 py-3 w-10"></th>
           </tr>
         </thead>
-        <tbody id="tbody" class="navy divide-y divide-white/10"></tbody>
+        <tbody id="tbody" class="navy"></tbody>
       </table>
       <div id="emptyState" class="text-center text-white/90 py-10 hidden">Rien à afficher pour le moment.</div>
     </section>
@@ -114,7 +190,7 @@
   <!-- Bouton + -->
   <button id="fab" class="fixed bottom-5 right-5 z-50 rounded-full w-14 h-14 flex items-center justify-center text-white text-2xl shadow-2xl" style="background:var(--navy);">＋</button>
 
-  <!-- Modal -->
+  <!-- Modal ajout -->
   <div id="modal" class="fixed inset-0 bg-black/60 hidden flex items-end sm:items-center justify-center p-4 z-50">
     <div class="bg-white rounded-2xl w-full max-w-xl p-5 shadow-xl">
       <div class="flex items-center justify-between mb-3">
@@ -135,7 +211,7 @@
   </div>
 
   <script>
-    // --- Firebase config ---
+    /* ---------- Firebase config ---------- */
     const firebaseConfig = {
       apiKey: "AIzaSyAvUXd1GMRaPf0IQYk9wFikRZWMm-Z3v_Y",
       authDomain: "listecadeaux-86625.firebaseapp.com",
@@ -151,7 +227,7 @@
     const db = firebase.database();
     const rootRef = db.ref(`giftlists/${LIST_ID}/items`);
 
-    // Refs UI
+    // UI refs
     const tbody = document.getElementById('tbody');
     const filterReserved = document.getElementById('filterReserved');
     const filterSearch = document.getElementById('filterSearch');
@@ -177,67 +253,82 @@
     function render(){
       const res = filterReserved.value; // all | yes | no
       const q = filterSearch.value.toLowerCase().trim();
+
       const entries = Object.entries(allItems).map(([id,x])=>({id, ...x}))
         .sort((a,b)=> (a.reserved===true) - (b.reserved===true) || (a.name||'').localeCompare(b.name||''));
 
       tbody.innerHTML = '';
       let visible=0, total=entries.length, totalReserved=0;
 
-      for(const it of entries){
+      for (const it of entries){
         if (res==='yes' && !it.reserved) continue;
         if (res==='no' && it.reserved) continue;
         const hay = `${it.name||''} ${it.price||''} ${it.alts||''}`.toLowerCase();
         if (q && !hay.includes(q)) continue;
+
         visible++; if (it.reserved) totalReserved++;
 
-        const tr = document.createElement('tr');
-        tr.className = it.reserved ? 'row-checked' : '';
+        /* L1 : OK | Nom | Prix | croix */
+        const trA = document.createElement('tr');
+        trA.className = (it.reserved ? 'row-checked ' : '') + 'rowA';
 
-        // OK
         const td0 = document.createElement('td');
         td0.className='px-4 py-3 align-top'; td0.setAttribute('data-label','OK');
         const cb = document.createElement('input');
-        cb.type='checkbox'; cb.checked = !!it.reserved;
+        cb.type='checkbox'; cb.checked=!!it.reserved;
         cb.addEventListener('change',()=>toggleReserved(it.id));
         td0.appendChild(cb);
 
-        // Nom (nom cliquable — pas d'URL brute)
         const td1 = document.createElement('td');
         td1.className='px-4 py-3 align-top'; td1.setAttribute('data-label','Nom');
         const nameLink = document.createElement('a');
-        nameLink.className='name hover:underline';
+        nameLink.className='name hover:opacity-90 block';
         nameLink.target='_blank'; nameLink.rel='noopener';
         nameLink.textContent = it.name || '(sans nom)';
         nameLink.href = it.url || 'javascript:void(0)';
         td1.appendChild(nameLink);
 
-        // Prix
-        const td2 = document.createElement('td'); td2.className='px-4 py-3 align-top'; td2.setAttribute('data-label','Prix');
+        const td2 = document.createElement('td');
+        td2.className='px-4 py-3 align-top'; td2.setAttribute('data-label','Prix');
         td2.textContent = it.price || '';
 
-        // Magasins → chips
-        const td3 = document.createElement('td'); td3.className='px-4 py-3 align-top'; td3.setAttribute('data-label','Magasins');
-        if (it.alts){
-          const parts = it.alts.split(',').map(s=>s.trim()).filter(Boolean);
+        const td3 = document.createElement('td');
+        td3.className='px-4 py-3 align-top cell-actions';
+        const del = document.createElement('button');
+        del.className='text-slate-300 hover:text-red-500'; del.title='Supprimer'; del.textContent='✕';
+        del.addEventListener('click',()=>{ if(confirm('Supprimer cet élément ?')) rootRef.child(it.id).remove(); });
+        td3.appendChild(del);
+
+        trA.append(td0, td1, td2, td3);
+        tbody.appendChild(trA);
+
+        /* L2 : magasins sur toute la largeur (colspan) */
+        const stores = (it.alts||'').split(',').map(s=>s.trim()).filter(Boolean);
+        if (stores.length){
+          const trB = document.createElement('tr');
+          trB.className = (it.reserved ? 'row-checked ' : '') + 'rowB';
+
+          const tdStores = document.createElement('td');
+          tdStores.className = 'stores-cell px-4 py-2';
+          tdStores.colSpan = 4;
+
           const ul = document.createElement('ul'); ul.className='stores';
-          for(const p of parts){
-            const li=document.createElement('li');
+          for (const p of stores){
+            const li = document.createElement('li');
+            li.className = 'chip';
             if (/^https?:\/\//i.test(p)){
-              const a=document.createElement('a'); a.href=p; a.target='_blank'; a.rel='noopener'; a.className='hover:underline'; a.textContent=p; li.appendChild(a);
-            } else { li.textContent=p; }
+              const a = document.createElement('a');
+              a.href=p; a.target='_blank'; a.rel='noopener'; a.className='hover:underline'; a.textContent=p;
+              li.appendChild(a);
+            } else {
+              li.textContent = p;
+            }
             ul.appendChild(li);
           }
-          td3.appendChild(ul);
+          tdStores.appendChild(ul);
+          trB.appendChild(tdStores);
+          tbody.appendChild(trB);
         }
-
-        // Supprimer (caché en mobile)
-        const td4 = document.createElement('td'); td4.className='px-4 py-3 align-top cell-actions';
-        const del = document.createElement('button'); del.className='text-slate-300 hover:text-red-500'; del.title='Supprimer'; del.textContent='✕';
-        del.addEventListener('click',()=>{ if(confirm('Supprimer cet élément ?')) rootRef.child(it.id).remove(); });
-        td4.appendChild(del);
-
-        tr.append(td0,td1,td2,td3,td4);
-        tbody.appendChild(tr);
       }
 
       counter.textContent = `${visible} affiché(s) / ${total} — ${totalReserved} coché(s)`;
